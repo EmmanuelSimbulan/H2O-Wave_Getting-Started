@@ -87,8 +87,14 @@ Run your program again. You should see the same results in your browser as befor
 
 </details>
 
-### Tutorial: System Monitor
+<details><summary><h3>Tutorial: System Monitor</h3> </summary>
 
-### Tutorial: Bean Counter
+</details>
 
-### Tutorial: Todo List
+<details><summary><h3>Tutorial: Bean Counter</h3> </summary>
+
+</details>
+
+<details><summary><h3>Tutorial: Todo List</h3> </summary>
+
+</details>
