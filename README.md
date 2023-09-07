@@ -225,4 +225,302 @@ Also, we built ourselves a little app that counts beans, and you can now put tha
 
 <details><summary><h3>Tutorial: Todo List</h3> </summary>
 
+In this tutorial, we will now craft a program of greater substance and utility—a real-time synchronized to-do list.
+
+Let's start by creating the initial skeleton of our code. The first step is to define an `@app` function. Additionally, we want to set up a landing page to display a list of to-dos. To achieve this, we will create a `show_todos()` function for now and call it from `serve()`.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/a7d69048-48ac-4645-babd-3074464ac1b1)
+
+
+A to-do item has some basic attributes: an ID, some text content, and whether it's completed or not. Let's define a `class` for that, with a global one-up `id`.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/0246f59e-cef1-4b86-adbf-8c63ff2544ce)
+
+
+Next, we'll create a to-do list in 'q.user' mode. We're doing this because we want to generate a list from 'q.user' or create one if it doesn't already exist.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/39d85934-623f-485b-ba2c-856bc01b0d0e)
+
+
+Next, we turn each incomplete to-do item into a checkbox (using `ui.checkbox()`), and display it in a form card (using `ui.form_card()`). Also, we want each checkbox to raise an event immediately when checked, so we set its `trigger` attribute to `True`.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/b0bf8aff-9282-477d-9873-bfc0fe80dc96)
+
+
+We also turn each completed to-do item into another list of checkboxes, checked by default (using its `value` attribute). We append this to the form card and put a separator in between (using `ui.separator()`) to distinguish the completed items from the incomplete ones.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/e0867271-6844-4cea-a4e7-cc6437785ee9)
+
+
+Point your browser to http://localhost:10101/todo.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/3f2c90e2-573a-46b2-9b4f-24d972060eb9)
+
+
+You should be able to see your todo list in all its glory. Unfortunately, checking any of the items seems to have no effect. Let's fix that next.
+
+Each time a checkbox is checked or unchecked, our `serve()` function is called, which in turn calls `show_todos()`.
+
+- If a checkbox is checked, `q.args` will contain a `True` for that checkbox.
+- If a checkbox is unchecked, `q.args` will contain a `False` for that checkbox.
+
+So, we iterate through all the to-do items and set their `done` attribute based on the value of their corresponding checkbox.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/15779475-a975-44de-a4ef-186db8bfbfa1)
+
+
+You should now be able to check/uncheck the items in your todo list.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/e869886a-b47f-4153-b675-cf6ea2530812)
+
+
+Next, let's display a form to add new items to our list. For that, we'll add a new button to our existing form, named `new_todo`, and direct the `serve()` function to the `new_todo()` function if the button is clicked. Recall that when buttons are clicked, `q.args.button_name` will be `True`, so we check if `q.args.new_todo` is `True`.
+
+In the `new_todo()` function, we display a new form containing a textbox (using `ui.textbox()`) and a set of buttons to add the item or return to to-do list (a `ui.buttons()` helps us display buttons side-by-side).
+
+```python
+from typing import List                 # We've added a new import statement for the List type
+from h2o_wave import Q, main, app, ui
+
+_id = 0
+
+# A simple class that represents a to-do item.
+class TodoItem:
+    def __init__(self, text):
+        global _id
+        _id += 1
+        self.id = f'todo_{_id}'
+        self.text = text
+        self.done = False
+
+@app('/todo')           # We've added a route called /todo
+async def serve(q: Q):  # We've added a function called serve() that will be called when the user interacts with the app
+    if q.args.new_todo:  # Display an input form.
+        new_todo(q)
+    else:  # Show all items.
+        show_todos(q)   # We've added a function called show_todos() that will be the landing page of our app  
+    await q.page.save()
+
+def show_todos(q: Q):
+    # Get items for this user.
+    todos: List[TodoItem] = q.user.todos
+
+    # Create a sample list if we don't have any.
+    if todos is None:
+        q.user.todos = todos = [TodoItem('Do this'), TodoItem('Do that'), TodoItem('Do something else')]
+
+    # If the user checked/unchecked an item, update our list.
+    for todo in todos:
+        if todo.id in q.args:
+            todo.done = q.args[todo.id]
+
+ # Create done/not-done checkboxes.
+    done = [ui.checkbox(name=todo.id, label=todo.text, value=True, trigger=True) for todo in todos if todo.done]
+    not_done = [ui.checkbox(name=todo.id, label=todo.text, trigger=True) for todo in todos if not todo.done]
+
+    # Display list
+    q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('To Do'),
+        ui.button(name='new_todo', label='New To Do...', primary=True),
+        *not_done,
+        *([ui.separator('Done')] if len(done) else []),
+        *done,
+    ])
+
+    def new_todo(q: Q):
+    # Display an input form
+    q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('New To Do'),
+        ui.textbox(name='text', label='What needs to be done?', multiline=True),
+        ui.buttons([
+            ui.button(name='add_todo', label='Add', primary=True),
+            ui.button(name='show_todos', label='Back'),
+        ]),
+    ])
+```
+
+You should now be able to bring up the new to-do form.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/4849e971-3b5b-4503-8e60-d753a89523ff)
+
+
+Finally, we handle the `add_todo` button-click, redirecting `serve()` to a new `add_todo()` function, which simply inserts a the new to-do item into our user-level todo list and calls `show_todos()` to redraw the to-do list.
+
+```python
+from typing import List                 # We've added a new import statement for the List type
+from h2o_wave import Q, main, app, ui
+
+_id = 0
+
+# A simple class that represents a to-do item.
+class TodoItem:
+    def __init__(self, text):
+        global _id
+        _id += 1
+        self.id = f'todo_{_id}'
+        self.text = text
+        self.done = False
+
+@app('/todo')           # We've added a route called /todo
+async def serve(q: Q):  # We've added a function called serve() that will be called when the user interacts with the app
+    if q.args.new_todo:  # Display an input form.
+        new_todo(q)
+    elif q.args.add_todo:  # Add an item.
+        add_todo(q)
+    else:  # Show all items.
+        show_todos(q)   # We've added a function called show_todos() that will be the landing page of our app  
+    await q.page.save()
+
+def show_todos(q: Q):
+    # Get items for this user.
+    todos: List[TodoItem] = q.user.todos
+
+    # Create a sample list if we don't have any.
+    if todos is None:
+        q.user.todos = todos = [TodoItem('Do this'), TodoItem('Do that'), TodoItem('Do something else')]
+
+    # If the user checked/unchecked an item, update our list.
+    for todo in todos:
+        if todo.id in q.args:
+            todo.done = q.args[todo.id]
+
+ # Create done/not-done checkboxes.
+    done = [ui.checkbox(name=todo.id, label=todo.text, value=True, trigger=True) for todo in todos if todo.done]
+    not_done = [ui.checkbox(name=todo.id, label=todo.text, trigger=True) for todo in todos if not todo.done]
+
+    # Display list
+    q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('To Do'),
+        ui.button(name='new_todo', label='New To Do...', primary=True),
+        *not_done,
+        *([ui.separator('Done')] if len(done) else []),
+        *done,
+    ])
+
+def add_todo(q: Q):
+    # Insert a new item
+    q.user.todos.insert(0, TodoItem(q.args.text or 'Untitled'))
+
+    # Go back to our list.
+    show_todos(q)
+
+def new_todo(q: Q):
+    # Display an input form
+        q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('New To Do'),
+        ui.textbox(name='text', label='What needs to be done?', multiline=True),
+        ui.buttons([
+            ui.button(name='add_todo', label='Add', primary=True),
+            ui.button(name='show_todos', label='Back'),
+        ]),
+    ])
+```
+
+You should now be able to add new to-do items to your list. Congratulations!
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/2c22cd8d-196b-4a29-908c-d4b2be465f8f)
+
+
+To make your app realtime, simply pass `mode='multicast'` to `@app()`.
+
+```python
+@app('/todo', mode = 'multicast')
+```
+
+Now try opening http://localhost:10101/todo from multiple browser tabs:
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/e09b514d-8d12-44fe-9f70-c9f0183f1d84)
+
+## Exercise[](https://wave.h2o.ai/docs/tutorial-todo#exercise)
+
+A little housekeeping goes a long way: add a "Clear" button on the main page to clear all completed to-dos.
+
+To add a "Clear" button on the main page to clear all completed to-dos, you can make the following modifications to your code:
+
+1. Define a new function called `clear_completed` to handle the clearing of completed to-dos.
+2. Add a "Clear" button to the `show_todos` function's form.
+3. Handle the "Clear" button click in the `serve` function.
+
+Here's the updated code:
+
+```python
+from typing import List
+from h2o_wave import Q, main, app, ui
+
+_id = 0
+
+class TodoItem:
+    def __init__(self, text):
+        global _id
+        _id += 1
+        self.id = f'todo_{_id}'
+        self.text = text
+        self.done = False
+
+@app('/todo', mode='multicast')
+async def serve(q: Q):
+    if q.args.new_todo:
+        new_todo(q)
+    elif q.args.add_todo:
+        add_todo(q)
+    elif q.args.clear_completed:  # Handle the "Clear" button click.
+        clear_completed(q)  # Call the clear_completed function.
+    else:
+        show_todos(q)
+    await q.page.save()
+
+def show_todos(q: Q):
+    todos: List[TodoItem] = q.user.todos
+
+    if todos is None:
+        q.user.todos = todos = [TodoItem('Do this'), TodoItem('Do that'), TodoItem('Do something else')]
+
+    for todo in todos:
+        if todo.id in q.args:
+            todo.done = q.args[todo.id]
+
+    done = [ui.checkbox(name=todo.id, label=todo.text, value=True, trigger=True) for todo in todos if todo.done]
+    not_done = [ui.checkbox(name=todo.id, label=todo.text, trigger=True) for todo in todos if not todo.done]
+
+    # Add a "Clear" button to the form.
+    q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('To Do'),
+        ui.button(name='new_todo', label='New To Do...', primary=True),
+        *not_done,
+        *([ui.separator('Done')] if len(done) else []),
+        *done,
+        ui.button(name='clear_completed', label='Clear Completed', primary=True),  # "Clear" button
+    ])
+
+def add_todo(q: Q):
+    q.user.todos.insert(0, TodoItem(q.args.text or 'Untitled'))
+    show_todos(q)
+
+def new_todo(q: Q):
+    q.page['form'] = ui.form_card(box='1 1 3 10', items=[
+        ui.text_l('New To Do'),
+        ui.textbox(name='text', label='What needs to be done?', multiline=True),
+        ui.buttons([
+            ui.button(name='add_todo', label='Add', primary=True),
+            ui.button(name='show_todos', label='Back'),
+        ]),
+    ])
+
+def clear_completed(q: Q):
+    # Remove completed to-dos from the list.
+    q.user.todos = [todo for todo in q.user.todos if not todo.done]
+    show_todos(q)  # Show the updated to-do list.
+
+if __name__ == '__main__':
+    main()
+
+```
+
+With these modifications, you've added a "Clear Completed" button that will clear all completed to-dos when clicked.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/f8b4b165-70bf-42d3-8a8e-765d0fe7525c)
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/83953080-2eed-4420-891a-1661168f4a24)
+
+
 </details>
