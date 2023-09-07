@@ -122,6 +122,105 @@ Here are the updated results for our webpage:
 
 <details><summary><h3>Tutorial: Bean Counter</h3> </summary>
 
+In this tutorial, we will create an interactive application using H2O Wave, which enables user interfaces to dynamically respond to events, such as user actions.
+
+The initial step in crafting this program, which will be actively listening to events from the UI, is to define an `@app` function. Now, let's proceed to write our program:
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/ff957df3-5d54-4707-bec1-0b937ffdb8d4)
+
+
+Now, let's attempt to execute our program within our activated virtual environment. Simply type 'wave run counter'.
+
+At this point, the app will be running, but it hasn't implemented any functionality yet.
+
+To accomplish this task, we need to incorporate a button into our application. Our primary goal is to create a button that increments and displays the bean count every time it's clicked.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/a68280f2-a1d8-4509-8782-1342dea6d9e9)
+
+
+Additionally, observe the disparity in the script between the current Wave Script and the previous Wave App script.
+
+| Task | Wave Script | Wave App |
+| --- | --- | --- |
+| Access page at route /foo | page = site['/foo'] | page = q.page |
+| Access card named foo | card = page['foo'] | card = q.page['foo'] |
+| Save page | page.save() | await q.page.save() |
+
+"In the Wave app, we consistently access pages using the query context 'q'. `q.page` consistently refers to the page located at the route specified in `@app()` (in this instance).
+
+Now, let's proceed to launch our application, directing our browser to [http://localhost:10101/counter."](http://localhost:10101/counter.%22)
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/39bfa25c-c839-4f84-8e4a-ab2c4ffa56e6)
+
+
+It's evident that clicking the button has no effect because we haven't implemented the button click handling yet. To resolve this, we'll handle button clicks by adding a condition to check if the button has been clicked. If it has, the bean count will be incremented.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/39ae69dc-5541-4a49-9d5a-53f1c1e0bf7c)
+
+
+The button should now function correctly.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/b11b2475-28f5-4ac5-a42d-f14a80fedf65)
+
+
+Now, let's endeavor to optimize our application's performance. Currently, with every button click, it redundantly recreates both the form card and the button, instead of efficiently updating the existing button's caption to reflect the current bean count.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/b00092fc-715c-44f5-ac9e-4330f1b0a92a)
+
+
+Now to make our app more interesting let’s take a look about how `q.client` stores arbitrary information associated with the client, `q.user` and `q.app` store arbitrary information associated with the user and the app, respectively.
+
+In most apps, you'll end up using a mix of `q.client`, `q.user` and `q.app` to correctly handle requests originating from:
+
+1. Different users.
+2. Different browser tabs belonging to the same user (possibly from different devices).
+3. The same browser tab.
+
+In other words, your Wave app is multi-user by default, but how the app manages data at the app-level, at the user-level and at the client-level is up to you.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/a591d57c-94fe-4407-aab1-ae084e2ef757)
+
+
+Now, let's execute our program. You will observe that both pages and both cards update simultaneously when opening two distinct web pages.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/2e7a3db1-e366-4540-88a5-d67a94e6e81d)
+
+
+As real-time synchronization is not feasible, we'll incorporate an 'app mode' into our code to facilitate real-time synchronization among clients.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/47bc859a-6731-49f8-9e15-62d72d9b0070)
+
+
+The default app mode is `unicast`, which means "don't sync across clients". On the other hand, `multicast` means "sync across clients". 
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/b8cc564d-f455-4929-90d9-4ab089847cd2)
+
+
+There's also a third mode, `broadcast`, which means "sync across users", which we'll see in the next step.
+
+In order to do that we’re going to make an App-level realtime sync which going from user-level bean counting to app-level bean counting is easy: simply store `bean_count` on `q.app` instead of `q.user`, and switch the app mode to `broadcast`:
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/118181a0-2c25-42a1-984e-0ab459f305f4)
+
+
+The `broadcast` mode can be used to build collaborative apps that need to synchronize state across all users, like group chat or multiplayer games.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/3d224462-f075-4762-ae71-f4ad53a8efea)
+
+
+## Summary[](https://wave.h2o.ai/docs/tutorial-counter#summary)
+
+In this tutorial, we learned how to author interactive applications, or *apps*, and easily add realtime sync capabilities to our apps. More importantly, we learned how to deal with events and manage state using four dictionary-like objects:
+
+| Attribute | Type | Use |
+| --- | --- | --- |
+| q.args | Read-only | Stores command arguments |
+| q.client | Read/Write | Stores client-level state |
+| q.user | Read/Write | Stores user-level state |
+| q.app | Read/Write | Stores app-level state |
+
+Also, we built ourselves a little app that counts beans, and you can now put that knowledge to good use, like build an online voting app.
+
 </details>
 
 <details><summary><h3>Tutorial: Todo List</h3> </summary>
