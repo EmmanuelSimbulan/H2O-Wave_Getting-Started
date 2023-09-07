@@ -89,6 +89,35 @@ Run your program again. You should see the same results in your browser as befor
 
 <details><summary><h3>Tutorial: System Monitor</h3> </summary>
 
+Prior to diving into code development, our initial step involves the installation of essential dependencies via the terminal. We'll execute the command "pip install psutil" to procure the indispensable 'psutil' package, enabling us to access and process system statistics seamlessly.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/ea5a4ab9-1350-483a-916e-9d00765d34d0)
+
+
+Next, we endeavored to craft a program tasked with vigilant system monitoring for our device, specifically targeting CPU usage.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/feb67ba0-e5d9-456a-bddf-dd56c2cec04c)
+
+Now, let's attempt to execute our program in the terminal.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/b0d205e7-0fa8-4b8d-9663-18aa2eb2ba7b)
+
+Point your browser to http://localhost:10101/monitor. Here's the result on the webpage server:
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/164f86a3-f0bd-43e3-80b6-e9f317f6461b)
+
+After that, we will add another code block to our program to monitor memory usage. In this step, we will simply duplicate the parts of our program to create another card that displays memory statistics.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/f11c9c77-8ca7-4f0f-9914-6b20a01d0d97)
+
+Now, let's attempt to execute our program. We'll save our code and then terminate the program before restarting it.
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/5f716242-53e2-45b2-90fb-dc5d55bb45d5)
+
+Here are the updated results for our webpage:
+
+![image](https://github.com/EmmanuelSimbulan/H2O-Wave_Getting-Started/assets/72858389/c4e1e8dc-5d81-437c-87f3-ec3f1845eb51)
+
 </details>
 
 <details><summary><h3>Tutorial: Bean Counter</h3> </summary>
